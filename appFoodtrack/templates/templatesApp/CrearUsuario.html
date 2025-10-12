@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - FoodTrack</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .selection-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .selection-intro {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .selection-intro h2 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .selection-intro p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .type-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .type-card {
+            border: 3px solid #ecf0f1;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .type-card:hover {
+            border-color: #2ecc71;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .type-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .type-card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .type-card p {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .form-screen {
+            display: none;
+        }
+
+        .form-screen.active {
+            display: block;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #2ecc71;
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            color: #27ae60;
+        }
+
+        .form-title {
+            flex: 1;
+        }
+
+        .form-title h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-title p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 5px rgba(46, 204, 113, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .password-requirements {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: #7f8c8d;
+        }
+
+        .requirement.met {
+            color: #2ecc71;
+        }
+
+        .requirement-icon {
+            margin-right: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.8rem;
+            margin-top: 0.2rem;
+            cursor: pointer;
+            accent-color: #2ecc71;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            color: #555;
+            font-weight: normal;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .checkbox-group a {
+            color: #2ecc71;
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.error {
+            background-color: #fadbd8;
+            color: #c0392b;
+            border: 1px solid #e74c3c;
+        }
+
+        .alert.success {
+            background-color: #d5f4e6;
+            color: #27ae60;
+            border: 1px solid #2ecc71;
+        }
+
+        .alert.info {
+            background-color: #d6eaf8;
+            color: #2980b9;
+            border: 1px solid #3498db;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .register-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-link {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .login-link a {
+            color: #2ecc71;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .org-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .org-option {
+            position: relative;
+        }
+
+        .org-option input[type="radio"] {
+            display: none;
+        }
+
+        .org-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .org-option input[type="radio"]:checked + label {
+            border-color: #2ecc71;
+            background-color: #f0fdf4;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .org-option label:hover {
+            border-color: #2ecc71;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .org-types {
+                grid-template-columns: 1fr;
+            }
+
+            .type-options {
+                grid-template-columns: 1fr;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 FoodTrack</h1>
+            <p>Crea tu cuenta y comienza a trackear donaciones</p>
+        </div>
+
+        <div class="content">
+            <!-- Pantalla de Selección -->
+            <div class="selection-screen" id="selectionScreen">
+                <div class="selection-intro">
+                    <h2>¿Cómo deseas registrarte?</h2>
+                    <p>Elige el tipo de cuenta que mejor se adapta a ti</p>
+                </div>
+
+                <div class="type-options">
+                    <div class="type-card" onclick="selectType('donor')">
+                        <div class="type-icon">💝</div>
+                        <h3>Donador</h3>
+                        <p>Empresa, negocio o persona que dona alimentos</p>
+                    </div>
+
+                    <div class="type-card" onclick="selectType('organization')">
+                        <div class="type-icon">🏢</div>
+                        <h3>Organización</h3>
+                        <p>Junta de vecinos, distribuidora o recolectora</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de Formulario -->
+            <div class="form-screen" id="formScreen">
+                <div class="alert" id="alert"></div>
+
+                <form id="registerForm">
+                    <!-- Encabezado con botón atrás -->
+                    <div class="form-header">
+                        <button type="button" class="back-btn" onclick="backToSelection()">← Atrás</button>
+                        <div class="form-title">
+                            <h2 id="formTitle">Registro</h2>
+                            <p id="formSubtitle">Completa tu información</p>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DONADOR -->
+                    <div id="donorSection" style="display: none;">
+                        <!-- Información Personal -->
+                        <div class="form-section">
+                            <div class="form-section-title">👤 Información Personal</div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">Nombre *</label>
+                                    <input type="text" id="firstName" name="firstName" placeholder="Juan" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Apellido *</label>
+                                    <input type="text" id="lastName" name="lastName" placeholder="García" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Correo Electrónico *</label>
+                                <input type="email" id="email" name="email" placeholder="juan@example.com" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Teléfono *</label>
+                                <input type="tel" id="phone" name="phone" placeholder="+56 9 1234 5678" required>
+                            </div>
+                        </div>
+
+                        <!-- Información de Donación -->
+                        <div class="form-section">
+                            <div class="form-section-title">🍎 Información de tu Donación</div>
+
+                            <div class="form-group">
+                                <label for="businessName">Nombre de tu Negocio/Empresa (Opcional)</label>
+                                <input type="text" id="businessName" name="businessName" placeholder="Ej: Supermercado El Mejor">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="donationType">Tipo de Donador *</label>
+                                <select id="donationType" name="donationType" required>
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="empresa">Empresa/Supermercado</option>
+                                    <option value="restaurant">Restaurante/Cafetería</option>
+                                    <option value="productor">Productor Agrícola</option>
+                                    <option value="persona">Persona Natural</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="city">Ciudad *</label>
+                                <input type="text" id="city" name="city" placeholder="Santiago" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN ORGANIZACIÓN -->
+                    <div id="organizationSection" style="display: none;">
+                        <!-- Información de la Organización -->
+                        <div class="form-section">
+                            <div class="form-section-title">📋 Información de la Organización</div>
+
+                            <div class="form-group">
+                                <label for="orgName">Nombre de la Organización *</label>
+                                <input type="text" id="orgName" name="orgName" placeholder="Ej: Junta de Vecinos Centro Norte" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tipo de Organización *</label>
+                                <div class="org-types">
+                                    <div class="org-option">
+                                        <input type="radio" id="orgType1" name="orgType" value="junta_vecinos" required>
+                                        <label for="orgType1">👥 Junta de Vecinos</label>
+                                    </div>
+                                    <div class="org-option">
+                                        <input type="radio" id="orgType2" name="orgType" value="distribuidora">
+                                        <label for="orgType2">🚚 Distribuidora</label>
+                                    </div>
+                                    <div class="org-option">
+                                        <input type="radio" id="orgType3" name="orgType" value="recolectora">
+                                        <label for="orgType3">📦 Recolectora</label>
+                                    </div>
+                                    <div class="org-option">
+                                        <input type="radio" id="orgType4" name="orgType" value="otra">
+                                        <label for="orgType4">🏢 Otra</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Descripción (Opcional)</label>
+                                <textarea id="description" name="description" placeholder="Cuéntanos más sobre tu organización..."></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="orgCity">Ciudad *</label>
+                                    <input type="text" id="orgCity" name="orgCity" placeholder="Santiago" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="orgPhone">Teléfono *</label>
+                                    <input type="tel" id="orgPhone" name="orgPhone" placeholder="+56 9 1234 5678" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información del Contacto -->
+                        <div class="form-section">
+                            <div class="form-section-title">👤 Información del Contacto</div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="orgFirstName">Nombre *</label>
+                                    <input type="text" id="orgFirstName" name="orgFirstName" placeholder="Juan" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="orgLastName">Apellido *</label>
+                                    <input type="text" id="orgLastName" name="orgLastName" placeholder="García" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="orgEmail">Correo Electrónico *</label>
+                                <input type="email" id="orgEmail" name="orgEmail" placeholder="juan@example.com" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN SEGURIDAD -->
+                    <div class="form-section">
+                        <div class="form-section-title">🔒 Seguridad</div>
+
+                        <div class="form-group">
+                            <label for="password">Contraseña *</label>
+                            <input type="password" id="password" name="password" placeholder="••••••••" required>
+                            <div class="password-requirements">
+                                <div class="requirement" id="req-length">
+                                    <span class="requirement-icon">○</span>
+                                    <span>Al menos 8 caracteres</span>
+                                </div>
+                                <div class="requirement" id="req-upper">
+                                    <span class="requirement-icon">○</span>
+                                    <span>Una letra mayúscula</span>
+                                </div>
+                                <div class="requirement" id="req-lower">
+                                    <span class="requirement-icon">○</span>
+                                    <span>Una letra minúscula</span>
+                                </div>
+                                <div class="requirement" id="req-number">
+                                    <span class="requirement-icon">○</span>
+                                    <span>Un número</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmar Contraseña *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <!-- Términos y Condiciones -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">
+                            Acepto los términos y condiciones y la política de privacidad *
+                        </label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="newsletter" name="newsletter">
+                        <label for="newsletter">
+                            Deseo recibir actualizaciones sobre FoodTrack y nuevas características
+                        </label>
+                    </div>
+
+                    <button type="submit" class="register-btn" id="registerBtn">Crear Cuenta</button>
+
+                    <div class="login-link">
+                        ¿Ya tienes cuenta? <a href="{% url 'inicioSesion' %}">Inicia sesión aquí</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentType = null;
+
+        function selectType(type) {
+            currentType = type;
+            document.getElementById('selectionScreen').style.display = 'none';
+            document.getElementById('formScreen').classList.add('active');
+
+            if (type === 'donor') {
+                document.getElementById('formTitle').textContent = 'Registro - Donador';
+                document.getElementById('formSubtitle').textContent = 'Información de donador';
+                document.getElementById('donorSection').style.display = 'block';
+                document.getElementById('organizationSection').style.display = 'none';
+            } else if (type === 'organization') {
+                document.getElementById('formTitle').textContent = 'Registro - Organización';
+                document.getElementById('formSubtitle').textContent = 'Información de organización';
+                document.getElementById('organizationSection').style.display = 'block';
+                document.getElementById('donorSection').style.display = 'none';
+            }
+        }
+
+        function backToSelection() {
+            document.getElementById('formScreen').classList.remove('active');
+            document.getElementById('selectionScreen').style.display = 'flex';
+            currentType = null;
+        }
+
+        const form = document.getElementById('registerForm');
+        const alertBox = document.getElementById('alert');
+        const passwordInput = document.getElementById('password');
+        const registerBtn = document.getElementById('registerBtn');
+
+        passwordInput.addEventListener('input', (e) => {
+            const password = e.target.value;
+
+            const requirements = {
+                'req-length': password.length >= 8,
+                'req-upper': /[A-Z]/.test(password),
+                'req-lower': /[a-z]/.test(password),
+                'req-number': /[0-9]/.test(password)
+            };
+
+            Object.entries(requirements).forEach(([id, isMet]) => {
+                const element = document.getElementById(id);
+                if (isMet) {
+                    element.classList.add('met');
+                    element.querySelector('.requirement-icon').textContent = '✓';
+                } else {
+                    element.classList.remove('met');
+                    element.querySelector('.requirement-icon').textContent = '○';
+                }
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            let formData = {
+                type: currentType,
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value,
+                newsletter: document.getElementById('newsletter').checked
+            };
+
+            if (currentType === 'donor') {
+                formData = {
+                    ...formData,
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    businessName: document.getElementById('businessName').value,
+                    donationType: document.getElementById('donationType').value,
+                    city: document.getElementById('city').value
+                };
+
+                if (!formData.donationType) {
+                    showAlert('Por favor selecciona un tipo de donador', 'error');
+                    return;
+                }
+            } else if (currentType === 'organization') {
+                formData = {
+                    ...formData,
+                    orgName: document.getElementById('orgName').value,
+                    orgType: document.querySelector('input[name="orgType"]:checked')?.value,
+                    description: document.getElementById('description').value,
+                    orgCity: document.getElementById('orgCity').value,
+                    orgPhone: document.getElementById('orgPhone').value,
+                    orgFirstName: document.getElementById('orgFirstName').value,
+                    orgLastName: document.getElementById('orgLastName').value,
+                    orgEmail: document.getElementById('orgEmail').value
+                };
+
+                if (!formData.orgType) {
+                    showAlert('Por favor selecciona un tipo de organización', 'error');
+                    return;
+                }
+            }
+
+            if (!validateEmail(formData.email || formData.orgEmail)) {
+                showAlert('Por favor ingresa un correo válido', 'error');
+                return;
+            }
+
+            if (!isPasswordStrong(formData.password)) {
+                showAlert('La contraseña no cumple con los requisitos de seguridad', 'error');
+                return;
+            }
+
+            if (formData.password !== formData.confirmPassword) {
+                showAlert('Las contraseñas no coinciden', 'error');
+                return;
+            }
+
+            if (!document.getElementById('terms').checked) {
+                showAlert('Debes aceptar los términos y condiciones', 'error');
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creando cuenta...';
+
+            try {
+                const response = awaitfetch('/crearUsuario/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('¡Cuenta creada exitosamente! Redirigiendo al login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = "{% url 'inicioSesion' %}";
+                    }, 2000);
+                } else {
+                    showAlert(data.message, 'error');
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = 'Crear Cuenta';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al conectar con el servidor', 'error');
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Crear Cuenta';
+            }
+        });
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function isPasswordStrong(password) {
+            return password.length >= 8 &&
+                   /[A-Z]/.test(password) &&
+                   /[a-z]/.test(password) &&
+                   /[0-9]/.test(password);
+        }
+
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert show ${type}`;
+
+            if (type === 'error') {
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
