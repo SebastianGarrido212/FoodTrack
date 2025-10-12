@@ -649,23 +649,47 @@
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('formScreen').classList.add('active');
 
+            // Secciones del formulario
+            const donorSection = document.getElementById('donorSection');
+            const organizationSection = document.getElementById('organizationSection');
+
+            // Inputs de cada sección
+            const donorInputs = donorSection.querySelectorAll('input, select, textarea');
+            const organizationInputs = organizationSection.querySelectorAll('input, select, textarea');
+
             if (type === 'donor') {
+                // Configuramos la sección del Donador
                 document.getElementById('formTitle').textContent = 'Registro - Donador';
                 document.getElementById('formSubtitle').textContent = 'Información de donador';
-                document.getElementById('donorSection').style.display = 'block';
-                document.getElementById('organizationSection').style.display = 'none';
+                donorSection.style.display = 'block';
+                organizationSection.style.display = 'none';
+
+                // Activamos los campos de donador y desactivamos los de organización
+                donorInputs.forEach(input => input.disabled = false);
+                organizationInputs.forEach(input => input.disabled = true);
+
             } else if (type === 'organization') {
+                // Configuramos la sección de la Organización
                 document.getElementById('formTitle').textContent = 'Registro - Organización';
                 document.getElementById('formSubtitle').textContent = 'Información de organización';
-                document.getElementById('organizationSection').style.display = 'block';
-                document.getElementById('donorSection').style.display = 'none';
+                organizationSection.style.display = 'block';
+                donorSection.style.display = 'none';
+                
+                // Activamos los campos de organización y desactivamos los de donador
+                organizationInputs.forEach(input => input.disabled = false);
+                donorInputs.forEach(input => input.disabled = true);
             }
-        }
+        }   
 
         function backToSelection() {
             document.getElementById('formScreen').classList.remove('active');
             document.getElementById('selectionScreen').style.display = 'flex';
             currentType = null;
+            
+            // Desactivamos todos los inputs al volver
+            document.querySelectorAll('#registerForm input, #registerForm select, #registerForm textarea').forEach(input => {
+                input.disabled = true;
+            });
         }
 
         const form = document.getElementById('registerForm');
