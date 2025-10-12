@@ -764,7 +764,7 @@
             registerBtn.textContent = 'Creando cuenta...';
 
             try {
-                const response = awaitfetch('/crearUsuario/', {
+                const response = await fetch('/crearUsuario/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
