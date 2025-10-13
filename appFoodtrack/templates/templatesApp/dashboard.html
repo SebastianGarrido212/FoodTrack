@@ -1,11 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+{% load static %}
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard - FoodTrack</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+        .sidebar-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s;
+            display: block;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .logout-section {
+            margin-top: auto;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem 3rem;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 2rem;
+        }
+        .welcome-card h2 {
+            margin-top: 0;
+            color: #27ae60;
+        }
+        .welcome-card p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    UWu
+    <div class="sidebar">
+        <div class="sidebar-header">🌱 FoodTrack</div>
+        <nav>
+            <a href="{% url 'dashboard' %}" class="nav-link active">Dashboard</a>
+            {% if usuario.tipo_usuario == 'donador' %}
+                <a href="#" class="nav-link">Mis Donaciones</a>
+            {% elif usuario.tipo_usuario == 'organizacion' %}
+                 <a href="#" class="nav-link">Donaciones Recibidas</a>
+            {% endif %}
+            <a href="#" class="nav-link">Mi Perfil</a>
+        </nav>
+        <div class="logout-section">
+            <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="header">
+            <h1>Mi Dashboard</h1>
+        </header>
+        
+        <div class="card welcome-card">
+            
+            <h2>¡Hola, {{ usuario.nombre }}!</h2>
+
+            {% if usuario.tipo_usuario == 'donador' %}
+                
+                <p>Bienvenido a tu panel de Donador. Desde aquí podrás gestionar y registrar tus donaciones.</p>
+                <p><strong>Tipo de Donador:</strong> {{ perfil.get_tipo_donador_display }}</p>
+                {% if perfil.nombre_negocio %}
+                    <p><strong>Negocio:</strong> {{ perfil.nombre_negocio }}</p>
+                {% endif %}
+
+            {% elif usuario.tipo_usuario == 'organizacion' %}
+                
+                <p>Bienvenido al panel de tu Organización. Revisa las donaciones disponibles y gestiona las recepciones.</p>
+                <p><strong>Organización:</strong> {{ perfil.nombre_organizacion }}</p>
+                <p><strong>Tipo:</strong> {{ perfil.get_tipo_organizacion_display }}</p>
+
+            {% else %}
+
+                <p>Bienvenido a tu panel de control.</p>
+            
+            {% endif %}
+        </div>
+
+        </div>
 </body>
 </html>

@@ -107,6 +107,8 @@ def inicioSesion(request):
 # =====================================================
 # VISTA: CREAR USUARIO (REGISTRO)
 # =====================================================
+# appFoodtrack/views.py
+
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def crearUsuario(request):
@@ -121,36 +123,36 @@ def crearUsuario(request):
     elif request.method == 'POST':
         try:
             data = json.loads(request.body)
-            tipo_usuario = data.get('type')  # 'donor' o 'organization'
-            
-            # Validaciones comunes
-            email = data.get('email')
+            tipo_usuario = data.get('type')
             password = data.get('password')
-            nombre = data.get('firstName')
-            apellido = data.get('lastName')
-            telefono = data.get('phone')
-            
+
+            # Hacemos la vista más inteligente:
+            # Primero, determinamos de dónde sacar los datos según el tipo de usuario
+            if tipo_usuario == 'donor':
+                email = data.get('email')
+                nombre = data.get('firstName')
+                apellido = data.get('lastName')
+                telefono = data.get('phone')
+            elif tipo_usuario == 'organization':
+                # Para la organización, usamos los nombres de campos correctos
+                email = data.get('orgEmail')
+                nombre = data.get('orgFirstName')
+                apellido = data.get('orgLastName')
+                telefono = data.get('orgPhone')
+            else:
+                return JsonResponse({'success': False, 'message': 'Tipo de usuario no válido'}, status=400)
+
+            # Validaciones comunes
             if not all([email, password, nombre, apellido, tipo_usuario]):
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Campos requeridos faltando'
-                }, status=400)
+                return JsonResponse({'success': False, 'message': 'Faltan campos requeridos'}, status=400)
             
-            # Verificar que el email no exista
             if Usuario.objects.filter(email=email).exists():
-                return JsonResponse({
-                    'success': False,
-                    'message': 'El email ya está registrado'
-                }, status=400)
+                return JsonResponse({'success': False, 'message': 'El email ya está registrado'}, status=400)
             
-            # Validar contraseña
             if len(password) < 8:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'La contraseña debe tener al menos 8 caracteres'
-                }, status=400)
+                return JsonResponse({'success': False, 'message': 'La contraseña debe tener al menos 8 caracteres'}, status=400)
             
-            # Crear usuario
+            # Crear el objeto Usuario base
             usuario = Usuario.objects.create(
                 email=email,
                 password=make_password(password),
@@ -161,14 +163,14 @@ def crearUsuario(request):
                 activo=True
             )
             
-            # Crear perfil según tipo
+            # Crear el perfil específico
             if tipo_usuario == 'donor':
                 Donador.objects.create(
                     usuario=usuario,
                     nombre_negocio=data.get('businessName'),
                     tipo_donador=data.get('donationType'),
-                    ciudad=data.get('city'),
-                    descripcion=data.get('description')
+                    ciudad=data.get('city')
+                    # El campo 'descripcion' no se está enviando desde el frontend para donador, lo cual está bien.
                 )
             
             elif tipo_usuario == 'organization':
@@ -180,7 +182,6 @@ def crearUsuario(request):
                     descripcion=data.get('description')
                 )
             
-            # Registrar en historial
             HistorialTransacciones.objects.create(
                 usuario=usuario,
                 tipo_accion='crear_usuario',
@@ -199,17 +200,9 @@ def crearUsuario(request):
             }, status=201)
         
         except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'message': 'Datos inválidos'
-            }, status=400)
+            return JsonResponse({'success': False, 'message': 'Datos inválidos'}, status=400)
         except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error en el servidor: {str(e)}'
-            }, status=500)
-
-
+            return JsonResponse({'success': False, 'message': f'Error en el servidor: {str(e)}'}, status=500)
 # =====================================================
 # VISTA: LOGOUT
 # =====================================================
@@ -233,17 +226,37 @@ def logout(request):
 # =====================================================
 # VISTA: DASHBOARD (Ejemplo - puedes expandir)
 # =====================================================
+# foodtrack/views.py
+
 def dashboard(request):
     """Dashboard del usuario logueado"""
     if 'usuario_id' not in request.session:
-        return redirect('templatesApp/inicioSesion.html')
+        # Si no hay sesión, lo redirigimos al login
+        return redirect('inicioSesion') # Corregido para apuntar al nombre de la URL
     
     try:
+        # Buscamos al usuario por el ID guardado en la sesión
         usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        
+        # Preparamos el "contexto", que son los datos que enviaremos a la plantilla
         context = {
             'usuario': usuario,
-            'tipo_usuario': usuario.tipo_usuario
         }
+        
+        # Ahora, buscamos el perfil específico y lo añadimos al contexto
+        if usuario.tipo_usuario == 'donador':
+            # Si es donador, buscamos su perfil de donador
+            perfil = Donador.objects.get(usuario=usuario)
+            context['perfil'] = perfil
+        elif usuario.tipo_usuario == 'organizacion':
+            # Si es organización, buscamos su perfil de organización
+            perfil = Organizacion.objects.get(usuario=usuario)
+            context['perfil'] = perfil
+            
+        # Enviamos todos los datos a la plantilla dashboard.html
         return render(request, 'templatesApp/dashboard.html', context)
+    
     except Usuario.DoesNotExist:
-        return redirect('templatesApp/inicioSesion.html')
+        # Si por alguna razón el usuario no existe, limpiamos la sesión y lo mandamos al login
+        request.session.flush()
+        return redirect('inicioSesion') # Corregido para apuntar al nombre de la URL
