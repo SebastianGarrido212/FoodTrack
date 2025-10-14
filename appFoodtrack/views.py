@@ -1,4 +1,3 @@
-# foodtrack/views.py
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.http import require_http_methods
@@ -107,7 +106,6 @@ def inicioSesion(request):
 # =====================================================
 # VISTA: CREAR USUARIO (REGISTRO)
 # =====================================================
-# appFoodtrack/views.py
 
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
@@ -170,7 +168,6 @@ def crearUsuario(request):
                     nombre_negocio=data.get('businessName'),
                     tipo_donador=data.get('donationType'),
                     ciudad=data.get('city')
-                    # El campo 'descripcion' no se está enviando desde el frontend para donador, lo cual está bien.
                 )
             
             elif tipo_usuario == 'organization':
@@ -224,15 +221,14 @@ def logout(request):
 
 
 # =====================================================
-# VISTA: DASHBOARD (Ejemplo - puedes expandir)
+# VISTA: DASHBOARD
 # =====================================================
-# foodtrack/views.py
 
 def dashboard(request):
     """Dashboard del usuario logueado"""
     if 'usuario_id' not in request.session:
         # Si no hay sesión, lo redirigimos al login
-        return redirect('inicioSesion') # Corregido para apuntar al nombre de la URL
+        return redirect('inicioSesion')
     
     try:
         # Buscamos al usuario por el ID guardado en la sesión
@@ -259,4 +255,4 @@ def dashboard(request):
     except Usuario.DoesNotExist:
         # Si por alguna razón el usuario no existe, limpiamos la sesión y lo mandamos al login
         request.session.flush()
-        return redirect('inicioSesion') # Corregido para apuntar al nombre de la URL
+        return redirect('inicioSesion')

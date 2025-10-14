@@ -19,7 +19,6 @@ from django.urls import path
 from appFoodtrack import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('inicio/', views.inicio, name="menuInicial"),
     path('iniciarSesion/',views.inicioSesion, name="inicioSesion"),
     path('crearUsuario/',views.crearUsuario, name="crearUsuario"),
