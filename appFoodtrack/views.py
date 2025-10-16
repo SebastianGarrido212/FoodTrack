@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Donacion, Donador
 import json
-from appFoodtrack.models import Usuario, Donador, Organizacion, HistorialTransacciones
+from appFoodtrack.models import Usuario, Donador, Organizacion, HistorialTransacciones, RecepcionDonacion, Donacion
 
 # =====================================================
 # VISTA: MENÚ INICIAL / PÁGINA PRINCIPAL
@@ -416,3 +416,51 @@ def ver_donaciones_disponibles(request):
     
     # Renderizamos la nueva plantilla que crearemos a continuación
     return render(request, 'templatesApp/donaciones_disponibles.html', context)
+
+# =====================================================
+# VISTA: ACEPTAR UNA DONACIÓN (PARA ORGANIZACIONES)
+# =====================================================
+def aceptar_donacion(request, donacion_id):
+    # Primero, verificamos que el usuario sea una organización logueada
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+
+    try:
+        usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        if usuario.tipo_usuario != 'organizacion':
+            return redirect('dashboard')
+        
+        # Obtenemos el perfil de la organización y la donación
+        organizacion = Organizacion.objects.get(usuario=usuario)
+        donacion = get_object_or_404(Donacion, id=donacion_id, estado='pendiente')
+
+    except (Usuario.DoesNotExist, Organizacion.DoesNotExist):
+        request.session.flush()
+        return redirect('inicioSesion')
+    except Donacion.DoesNotExist:
+        # Si la donación no existe o ya no está pendiente, lo mandamos de vuelta
+        return redirect('ver_donaciones_disponibles')
+
+    # --- La Lógica Principal ---
+    # 1. Actualizamos el estado de la donación
+    donacion.estado = 'en_transito'
+    donacion.save()
+
+    # 2. Creamos el registro de recepción para vincular la organización a la donación
+    RecepcionDonacion.objects.create(
+        donacion=donacion,
+        organizacion=organizacion,
+        cantidad_recibida=donacion.cantidad,  # Asumimos que se recibe la cantidad completa
+        responsable_name=f"{usuario.nombre} {usuario.apellido}"
+    )
+
+    # 3. (Opcional pero recomendado) Registrar en el historial de transacciones
+    HistorialTransacciones.objects.create(
+        usuario=usuario,
+        donacion=donacion,
+        tipo_accion='recepcionar_donacion',
+        descripcion=f"La organización '{organizacion.nombre_organizacion}' aceptó la donación de '{donacion.tipo_alimento}'."
+    )
+
+    # Redirigimos a la misma página. La donación aceptada ya no aparecerá en la lista.
+    return redirect('ver_donaciones_disponibles')

@@ -45,7 +45,7 @@
                         <td>{{ donacion.donador.ciudad }}</td>
                         <td>{{ donacion.fecha_creacion|date:"d/m/Y H:i" }}</td>
                         <td>
-                            <a href="#" class="action-link">Aceptar</a>
+                            <a href="{% url 'aceptar_donacion' donacion.id %}" class="action-link">Aceptar</a>
                         </td>
                     </tr>
                     {% empty %}
