@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Donaciones - FoodTrack</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .header h1 { color: #2c3e50; margin: 0; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; text-decoration: none; transition: all 0.3s; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; font-weight: bold; }
+        .btn:hover { transform: translateY(-2px); }
+        .table-container { background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { background-color: #f8f9fa; color: #555; font-weight: 600; }
+        .status { padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.8rem; font-weight: bold; color: white; text-transform: capitalize; }
+        .status-pendiente { background-color: #f39c12; }
+        .status-en_transito { background-color: #3498db; }
+        .status-entregada { background-color: #2ecc71; }
+        .status-cancelada { background-color: #e74c3c; }
+        .no-donations { text-align: center; padding: 3rem; color: #7f8c8d; }
+        .back-link { display: inline-block; margin-top: 1.5rem; color: #7f8c8d; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Historial de Mis Donaciones</h1>
+            <a href="{% url 'crearDonacion' %}" class="btn">＋ Nueva Donación</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alimento</th>
+                        <th>Cantidad</th>
+                        <th>Fecha de Registro</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donacion in donaciones %}
+                    <tr>
+                        <td>{{ donacion.tipo_alimento }}</td>
+                        <td>{{ donacion.cantidad }} {{ donacion.get_unidad_medida_display }}</td>
+                        <td>{{ donacion.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <span class="status status-{{ donacion.estado }}">{{ donacion.get_estado_display }}</span>
+                        </td>
+                        <td>
+                            <a href="#">Ver</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="no-donations">
+                            <h2>Aún no has registrado ninguna donación.</h2>
+                            <p>¡Haz clic en "Nueva Donación" para empezar!</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{% url 'dashboard' %}" class="back-link">← Volver al Dashboard</a>
+    </div>
+</body>
+</html>

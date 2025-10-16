@@ -24,5 +24,6 @@ urlpatterns = [
     path('crearUsuario/',views.crearUsuario, name="crearUsuario"),
     path('logout/', views.logout, name="logout"),
     path('dashboard/', views.dashboard, name="dashboard"),
-    path('donacion/nueva/', views.crear_donacion, name="crearDonacion")
+    path('donacion/nueva/', views.crear_donacion, name="crearDonacion"),
+    path('donacion/', views.ver_donaciones, name="verDonaciones")
 ]

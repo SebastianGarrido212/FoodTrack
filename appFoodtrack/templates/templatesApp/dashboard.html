@@ -70,6 +70,19 @@
             font-size: 1.1rem;
             color: #555;
         }
+        /* ... al final de tu etiqueta <style> ... */
+        .status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            text-transform: capitalize;
+        }
+        .status-pendiente { background-color: #f39c12; }
+        .status-en_transito { background-color: #3498db; }
+        .status-entregada { background-color: #2ecc71; }
+        .status-cancelada { background-color: #e74c3c; }
     </style>
 </head>
 <body>
@@ -78,6 +91,7 @@
         <nav>
             <a href="{% url 'dashboard' %}" class="nav-link active">Dashboard</a>
             {% if usuario.tipo_usuario == 'donador' %}
+                <a href="{% url 'verDonaciones' %}" class="nav-link">Mis Donaciones</a>
                 <a href="{% url 'crearDonacion' %}" class="nav-link">Nueva Donacion</a>
             {% elif usuario.tipo_usuario == 'organizacion' %}
                  <a href="#" class="nav-link">Donaciones Recibidas</a>
@@ -118,6 +132,46 @@
             
             {% endif %}
         </div>
+        {% if usuario.tipo_usuario == 'donador' %}
+        <div class="card" style="margin-top: 2rem;">
+            <h3>Últimas Donaciones Registradas</h3>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 1px solid #ecf0f1;">
+                        <th style="padding: 0.75rem;">Alimento</th>
+                        <th style="padding: 0.75rem;">Cantidad</th>
+                        <th style="padding: 0.75rem;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donacion in ultimas_donaciones %}
+                    <tr>
+                        <td style="padding: 0.75rem;">{{ donacion.tipo_alimento }}</td>
+                        <td style="padding: 0.75rem;">{{ donacion.cantidad }} {{ donacion.get_unidad_medida_display }}</td>
+                        <td style="padding: 0.75rem;">
+                        <td>
+                            <span class="status status-{{ donacion.estado }}">{{ donacion.get_estado_display }}</span>
+                        </td>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="padding: 2rem; text-align: center; color: #7f8c8d;">
+                            Aún no tienes donaciones. ¡Registra la primera!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="text-align: right; margin-top: 1.5rem;">
+                <a href="{% url 'verDonaciones' %}" style="color: #27ae60; text-decoration: none; font-weight: bold;">
+                    Ver Historial Completo →
+                </a>
+            </div>
+        </div>
+        {% endif %}
 
         </div>
 </body>

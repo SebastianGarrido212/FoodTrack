@@ -228,33 +228,29 @@ def logout(request):
 def dashboard(request):
     """Dashboard del usuario logueado"""
     if 'usuario_id' not in request.session:
-        # Si no hay sesión, lo redirigimos al login
         return redirect('inicioSesion')
     
     try:
-        # Buscamos al usuario por el ID guardado en la sesión
         usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        context = {'usuario': usuario}
         
-        # Preparamos el "contexto", que son los datos que enviaremos a la plantilla
-        context = {
-            'usuario': usuario,
-        }
-        
-        # Ahora, buscamos el perfil específico y lo añadimos al contexto
         if usuario.tipo_usuario == 'donador':
-            # Si es donador, buscamos su perfil de donador
             perfil = Donador.objects.get(usuario=usuario)
             context['perfil'] = perfil
+            
+            # --- LÍNEA CLAVE AQUÍ ---
+            # Buscamos las últimas 5 donaciones y las añadimos al contexto.
+            ultimas_donaciones = Donacion.objects.filter(donador=perfil).order_by('-fecha_creacion')[:5]
+            context['ultimas_donaciones'] = ultimas_donaciones
+
         elif usuario.tipo_usuario == 'organizacion':
-            # Si es organización, buscamos su perfil de organización
             perfil = Organizacion.objects.get(usuario=usuario)
             context['perfil'] = perfil
+            # (En el futuro, aquí podríamos buscar donaciones disponibles para la organización)
             
-        # Enviamos todos los datos a la plantilla dashboard.html
         return render(request, 'templatesApp/dashboard.html', context)
-    
-    except Usuario.DoesNotExist:
-        # Si por alguna razón el usuario no existe, limpiamos la sesión y lo mandamos al login
+        
+    except (Usuario.DoesNotExist, Donador.DoesNotExist, Organizacion.DoesNotExist):
         request.session.flush()
         return redirect('inicioSesion')
     
@@ -311,3 +307,34 @@ def crear_donacion(request):
         'unidades': Donacion.UNIDAD_MEDIDA_CHOICES
     }
     return render(request, 'templatesApp/crearDonacion.html', context)
+
+# =====================================================
+# VISTA: VER EL HISTORIAL DE DONACIONES DE UN DONADOR
+# =====================================================
+def ver_donaciones(request):
+    # Verificamos que el usuario haya iniciado sesión y sea un donador
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+
+    try:
+        usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        if usuario.tipo_usuario != 'donador':
+            return redirect('dashboard')
+        
+        donador = Donador.objects.get(usuario=usuario)
+    except (Usuario.DoesNotExist, Donador.DoesNotExist):
+        request.session.flush()
+        return redirect('inicioSesion')
+
+    # Esta es la línea clave:
+    # Filtramos todas las donaciones para obtener solo las del donador actual
+    # y las ordenamos por fecha, de la más nueva a la más antigua.
+    donaciones = Donacion.objects.filter(donador=donador).order_by('-fecha_creacion')
+
+    # Preparamos los datos para enviarlos a la plantilla
+    context = {
+        'donaciones': donaciones
+    }
+    
+    # Renderizamos la nueva plantilla que crearemos a continuación
+    return render(request, 'templatesApp/verDonaciones.html', context)
