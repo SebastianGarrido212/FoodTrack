@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
@@ -338,3 +338,53 @@ def ver_donaciones(request):
     
     # Renderizamos la nueva plantilla que crearemos a continuación
     return render(request, 'templatesApp/verDonaciones.html', context)
+
+# =====================================================
+# VISTA: EDITAR UNA DONACIÓN EXISTENTE
+# =====================================================
+def editar_donacion(request, donacion_id):
+    # Usamos get_object_or_404 para obtener la donación. Si no existe, dará un error 404.
+    donacion = get_object_or_404(Donacion, id=donacion_id)
+
+    # Verificamos que el usuario sea el dueño de la donación y que esté pendiente
+    if 'usuario_id' not in request.session or donacion.donador.usuario.id != request.session['usuario_id']:
+        return redirect('inicioSesion') # No es su donación, fuera.
+    if donacion.estado != 'pendiente':
+        return redirect('verDonaciones') # No se puede editar si ya no está pendiente.
+
+    if request.method == 'POST':
+        # Si el formulario se envía, actualizamos los campos del objeto 'donacion'
+        donacion.tipo_alimento = request.POST.get('tipo_alimento')
+        donacion.cantidad = request.POST.get('cantidad')
+        donacion.unidad_medida = request.POST.get('unidad_medida')
+        donacion.fecha_vencimiento = request.POST.get('fecha_vencimiento') if request.POST.get('fecha_vencimiento') else None
+        donacion.descripcion = request.POST.get('descripcion')
+        donacion.save() # Guardamos los cambios en la base de datos
+        return redirect('verDonaciones')
+
+    # Si es GET, mostramos el formulario pre-cargado con los datos de la donación
+    context = {
+        'unidades': Donacion.UNIDAD_MEDIDA_CHOICES,
+        'donacion': donacion # Pasamos el objeto donación a la plantilla
+    }
+    # Reutilizaremos la misma plantilla de creación, ¡muy eficiente!
+    return render(request, 'templatesApp/editar_donacion.html', context)
+
+
+# =====================================================
+# VISTA: CANCELAR UNA DONACIÓN
+# =====================================================
+def cancelar_donacion(request, donacion_id):
+    donacion = get_object_or_404(Donacion, id=donacion_id)
+
+    # Verificamos seguridad: que sea el dueño y que esté pendiente
+    if 'usuario_id' not in request.session or donacion.donador.usuario.id != request.session['usuario_id']:
+        return redirect('inicioSesion')
+    if donacion.estado != 'pendiente':
+        return redirect('verDonaciones')
+
+    # En lugar de borrarla (lo cual es destructivo), cambiamos su estado.
+    donacion.estado = 'cancelada'
+    donacion.save()
+
+    return redirect('verDonaciones')

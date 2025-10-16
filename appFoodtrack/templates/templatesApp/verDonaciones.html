@@ -52,7 +52,12 @@
                             <span class="status status-{{ donacion.estado }}">{{ donacion.get_estado_display }}</span>
                         </td>
                         <td>
-                            <a href="#">Ver</a>
+                            {% if donacion.estado == 'pendiente' %}
+                                <a href="{% url 'editar_donacion' donacion.id %}" style="color: #f39c12; text-decoration: none; margin-right: 1rem;">Editar</a>
+                                <a href="{% url 'cancelar_donacion' donacion.id %}" style="color: #e74c3c; text-decoration: none;" onclick="return confirm('¿Estás seguro de que quieres cancelar esta donación?');">Cancelar</a>
+                            {% else %}
+                                <span>--</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

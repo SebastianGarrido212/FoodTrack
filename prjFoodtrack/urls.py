@@ -25,5 +25,7 @@ urlpatterns = [
     path('logout/', views.logout, name="logout"),
     path('dashboard/', views.dashboard, name="dashboard"),
     path('donacion/nueva/', views.crear_donacion, name="crearDonacion"),
-    path('donacion/', views.ver_donaciones, name="verDonaciones")
+    path('donacion/', views.ver_donaciones, name="verDonaciones"),
+    path('donacion/editar/<int:donacion_id>/', views.editar_donacion, name="editar_donacion"),
+    path('donacion/cancelar/<int:donacion_id>/', views.cancelar_donacion, name="cancelar_donacion"),
 ]
