@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .models import Donacion, Donador
 import json
 from appFoodtrack.models import Usuario, Donador, Organizacion, HistorialTransacciones
 
@@ -256,3 +257,57 @@ def dashboard(request):
         # Si por alguna razón el usuario no existe, limpiamos la sesión y lo mandamos al login
         request.session.flush()
         return redirect('inicioSesion')
+    
+
+# =====================================================
+# VISTA: CREAR UNA NUEVA DONACIÓN
+# =====================================================
+def crear_donacion(request):
+    # Primero, verificamos que el usuario haya iniciado sesión
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+
+    # Verificamos que el usuario sea un donador
+    try:
+        usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        if usuario.tipo_usuario != 'donador':
+            # Si no es donador, no debería estar aquí. Lo mandamos a su dashboard.
+            return redirect('dashboard')
+        
+        # Buscamos el perfil del donador para asociarlo a la donación
+        donador = Donador.objects.get(usuario=usuario)
+    except (Usuario.DoesNotExist, Donador.DoesNotExist):
+        # Si hay algún problema, cerramos sesión por seguridad
+        request.session.flush()
+        return redirect('inicioSesion')
+
+
+    # Si el método es POST, significa que el usuario envió el formulario
+    if request.method == 'POST':
+        # Obtenemos los datos del formulario
+        tipo_alimento = request.POST.get('tipo_alimento')
+        cantidad = request.POST.get('cantidad')
+        unidad = request.POST.get('unidad_medida')
+        vencimiento = request.POST.get('fecha_vencimiento')
+        descripcion = request.POST.get('descripcion')
+
+        # Creamos la donación en la base de datos
+        Donacion.objects.create(
+            donador=donador,
+            tipo_alimento=tipo_alimento,
+            cantidad=cantidad,
+            unidad_medida=unidad,
+            fecha_vencimiento=vencimiento if vencimiento else None,
+            descripcion=descripcion,
+            estado='pendiente' # El estado inicial es siempre pendiente
+        )
+        
+        # Redirigimos al usuario a su dashboard después de crear la donación
+        return redirect('dashboard')
+
+    # Si el método es GET, solo mostramos la página con el formulario
+    # Pasamos las opciones de 'unidad_medida' desde el modelo para usarlas en el HTML
+    context = {
+        'unidades': Donacion.UNIDAD_MEDIDA_CHOICES
+    }
+    return render(request, 'templatesApp/crearDonacion.html', context)

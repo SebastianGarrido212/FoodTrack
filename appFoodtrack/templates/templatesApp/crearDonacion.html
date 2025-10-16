@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Nueva Donación - FoodTrack</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: 600px; width: 100%; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; padding: 2rem; text-align: center; }
+        .header h1 { margin: 0; }
+        .form-content { padding: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 2px solid #ecf0f1; border-radius: 5px; font-size: 1rem; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #2ecc71; }
+        .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+        .btn { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; border: none; border-radius: 5px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .back-link { display: block; text-align: center; margin-top: 1rem; color: #7f8c8d; text-decoration: none; }
+        .back-link:hover { color: #27ae60; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍎 Registrar Nueva Donación</h1>
+        </div>
+        <div class="form-content">
+            <form action="{% url 'crearDonacion' %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="tipo_alimento">Tipo de Alimento *</label>
+                    <input type="text" id="tipo_alimento" name="tipo_alimento" placeholder="Ej: Manzanas, Arroz, Leche" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad *</label>
+                        <input type="number" id="cantidad" name="cantidad" placeholder="Ej: 20" required step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="unidad_medida">Unidad *</label>
+                        <select id="unidad_medida" name="unidad_medida" required>
+                            {% for value, display in unidades %}
+                                <option value="{{ value }}">{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_vencimiento">Fecha de Vencimiento (Opcional)</label>
+                    <input type="date" id="fecha_vencimiento" name="fecha_vencimiento">
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción (Opcional)</label>
+                    <textarea id="descripcion" name="descripcion" rows="3" placeholder="Detalles adicionales, como el estado del empaque o la marca."></textarea>
+                </div>
+                <button type="submit" class="btn">Registrar Donación</button>
+                <a href="{% url 'dashboard' %}" class="back-link">Volver al Dashboard</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -19,9 +19,10 @@ from django.urls import path
 from appFoodtrack import views
 
 urlpatterns = [
-    path('inicio/', views.inicio, name="menuInicial"),
+    path('', views.inicio, name="menuInicial"),
     path('iniciarSesion/',views.inicioSesion, name="inicioSesion"),
     path('crearUsuario/',views.crearUsuario, name="crearUsuario"),
     path('logout/', views.logout, name="logout"),
     path('dashboard/', views.dashboard, name="dashboard"),
+    path('donacion/nueva/', views.crear_donacion, name="crearDonacion")
 ]

@@ -78,7 +78,7 @@
         <nav>
             <a href="{% url 'dashboard' %}" class="nav-link active">Dashboard</a>
             {% if usuario.tipo_usuario == 'donador' %}
-                <a href="#" class="nav-link">Mis Donaciones</a>
+                <a href="{% url 'crearDonacion' %}" class="nav-link">Nueva Donacion</a>
             {% elif usuario.tipo_usuario == 'organizacion' %}
                  <a href="#" class="nav-link">Donaciones Recibidas</a>
             {% endif %}
