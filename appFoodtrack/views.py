@@ -246,7 +246,8 @@ def dashboard(request):
         elif usuario.tipo_usuario == 'organizacion':
             perfil = Organizacion.objects.get(usuario=usuario)
             context['perfil'] = perfil
-            # (En el futuro, aquí podríamos buscar donaciones disponibles para la organización)
+            donaciones_disponibles = Donacion.objects.filter(estado='pendiente').order_by('-fecha_creacion')[:5]
+            context['donaciones_disponibles'] = donaciones_disponibles
             
         return render(request, 'templatesApp/dashboard.html', context)
         
@@ -388,3 +389,30 @@ def cancelar_donacion(request, donacion_id):
     donacion.save()
 
     return redirect('verDonaciones')
+
+# =====================================================
+# VISTA: VER TODAS LAS DONACIONES DISPONIBLES (PARA ORGANIZACIONES)
+# =====================================================
+def ver_donaciones_disponibles(request):
+    # Verificamos que el usuario haya iniciado sesión y sea una organización
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+
+    try:
+        usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        if usuario.tipo_usuario != 'organizacion':
+            # Si no es una organización, no debería estar aquí.
+            return redirect('dashboard')
+    except Usuario.DoesNotExist:
+        request.session.flush()
+        return redirect('inicioSesion')
+
+    # Buscamos todas las donaciones con estado 'pendiente'
+    donaciones = Donacion.objects.filter(estado='pendiente').order_by('-fecha_creacion')
+
+    context = {
+        'donaciones': donaciones
+    }
+    
+    # Renderizamos la nueva plantilla que crearemos a continuación
+    return render(request, 'templatesApp/donaciones_disponibles.html', context)

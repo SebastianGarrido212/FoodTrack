@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donaciones Disponibles - FoodTrack</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .header h1 { color: #2c3e50; margin: 0; }
+        .table-container { background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { background-color: #f8f9fa; color: #555; font-weight: 600; }
+        .no-donations { text-align: center; padding: 3rem; color: #7f8c8d; }
+        .back-link { display: inline-block; margin-top: 1.5rem; color: #7f8c8d; text-decoration: none; }
+        .action-link { color: #27ae60; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Donaciones Disponibles para Recolección</h1>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alimento</th>
+                        <th>Cantidad</th>
+                        <th>Donador</th>
+                        <th>Ciudad</th>
+                        <th>Fecha de Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donacion in donaciones %}
+                    <tr>
+                        <td>{{ donacion.tipo_alimento }}</td>
+                        <td>{{ donacion.cantidad }} {{ donacion.get_unidad_medida_display }}</td>
+                        <td>{{ donacion.donador.nombre_negocio|default:donacion.donador.usuario.nombre }}</td>
+                        <td>{{ donacion.donador.ciudad }}</td>
+                        <td>{{ donacion.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="#" class="action-link">Aceptar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="no-donations">
+                            <h2>¡Buen trabajo! No hay donaciones pendientes por ahora.</h2>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{% url 'dashboard' %}" class="back-link">← Volver al Dashboard</a>
+    </div>
+</body>
+</html>

@@ -94,12 +94,12 @@
                 <a href="{% url 'verDonaciones' %}" class="nav-link">Mis Donaciones</a>
                 <a href="{% url 'crearDonacion' %}" class="nav-link">Nueva Donacion</a>
             {% elif usuario.tipo_usuario == 'organizacion' %}
-                 <a href="#" class="nav-link">Donaciones Recibidas</a>
+                 <a href="{% url 'ver_donaciones_disponibles' %}" class="nav-link">Donaciones Recibidas</a>
             {% endif %}
             <a href="#" class="nav-link">Mi Perfil</a>
         </nav>
         <div class="logout-section">
-            <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
+            <a href="{% url 'menuInicial' %}" class="nav-link">Cerrar Sesión</a>
         </div>
     </div>
 
@@ -173,6 +173,49 @@
         </div>
         {% endif %}
 
+        {% if usuario.tipo_usuario == 'organizacion' %}
+        <div class="card" style="margin-top: 2rem;">
+            <h3>Últimas Donaciones Disponibles</h3>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 1px solid #ecf0f1;">
+                        <th style="padding: 0.75rem;">Alimento</th>
+                        <th style="padding: 0.75rem;">Cantidad</th>
+                        <th style="padding: 0.75rem;">Donador</th>
+                        <th style="padding: 0.75rem;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donacion in donaciones_disponibles %}
+                    <tr>
+                        <td style="padding: 0.75rem;">{{ donacion.tipo_alimento }}</td>
+                        <td style="padding: 0.75rem;">{{ donacion.cantidad }} {{ donacion.get_unidad_medida_display }}</td>
+                        <td style="padding: 0.75rem;">{{ donacion.donador.nombre_negocio|default:donacion.donador.usuario.nombre }}</td>
+                        <td style="padding: 0.75rem;">
+                            <a href="#" style="color: #27ae60; text-decoration: none; font-weight: bold;">Ver Detalles</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 2rem; text-align: center; color: #7f8c8d;">
+                            Por el momento, no hay donaciones pendientes disponibles.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="text-align: right; margin-top: 1.5rem;">
+                <a href="{% url 'ver_donaciones_disponibles' %}" style="color: #27ae60; text-decoration: none; font-weight: bold;">
+                    Ver Todas las Donaciones Disponibles →
+                </a>
+            </div>
         </div>
+        {% endif %}
+
+            </div>
+        </html>
+    </div>
 </body>
 </html>
