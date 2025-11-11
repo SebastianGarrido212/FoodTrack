@@ -30,4 +30,6 @@ urlpatterns = [
     path('donacion/cancelar/<int:donacion_id>/', views.cancelar_donacion, name="cancelar_donacion"),
     path('donaciones/disponibles/', views.ver_donaciones_disponibles, name="ver_donaciones_disponibles"),
     path('donacion/aceptar/<int:donacion_id>/', views.aceptar_donacion, name="aceptar_donacion"),
+    path('usuario/',views.usuario_list),
+    path('usuario/<int:pk>',views.usuario_detail),
 ]
