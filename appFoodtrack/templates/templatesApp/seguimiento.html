@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento - FoodTrack</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        .info-box {
+            position: absolute; top: 20px; left: 20px; z-index: 10;
+            background: white; padding: 20px; border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); max-width: 300px;
+        }
+        .status-badge {
+            background: #3498db; color: white; padding: 5px 10px;
+            border-radius: 15px; font-size: 0.8rem; font-weight: bold;
+            text-transform: uppercase;
+        }
+        .back-btn {
+            display: block; margin-top: 15px; text-decoration: none;
+            color: #7f8c8d; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="info-box">
+        <h2>🚚 Seguimiento</h2>
+        <p><strong>Producto:</strong> {{ donacion.tipo_alimento }}</p>
+        <p><span class="status-badge">{{ donacion.get_estado_display }}</span></p>
+        <hr>
+        <p><strong>📍 Origen:</strong> {{ origen }}</p>
+        <p><strong>🏁 Destino:</strong> {{ destino }}</p>
+        <a href="{% url 'dashboard' %}" class="back-btn">← Volver al Dashboard</a>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        function initMap() {
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            
+            // Coordenadas por defecto (Santiago)
+            const santiago = { lat: -33.4489, lng: -70.6693 };
+            
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: santiago,
+                disableDefaultUI: true, // Mapa más limpio
+            });
+
+            directionsRenderer.setMap(map);
+
+            // Calculamos la ruta
+            const request = {
+                origin: "{{ origen }}",
+                destination: "{{ destino }}",
+                travelMode: 'DRIVING'
+            };
+
+            directionsService.route(request, function(result, status) {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    console.error('Error en Google Maps:', status);
+                    alert("Modo demostración: No se pudo trazar la ruta real (Falta API Key o dirección inválida).");
+                }
+            });
+        }
+    </script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap&loading=async" async defer></script>
+</body>
+</html>

@@ -481,6 +481,14 @@
                                 <label for="phone">Teléfono *</label>
                                 <input type="tel" id="phone" name="phone" placeholder="+56 9 1234 5678" required>
                             </div>
+                            <div class="form-group">
+                                <label for="city">Ciudad *</label>
+                                <input type="text" id="city" name="city" placeholder="Santiago" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Dirección Exacta *</label>
+                                <input type="text" id="address" name="address" placeholder="Ej: Av. Providencia 1234" required>
+                            </div>
                         </div>
 
                         <!-- Información de Donación -->
@@ -502,11 +510,6 @@
                                     <option value="persona">Persona Natural</option>
                                     <option value="otro">Otro</option>
                                 </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="city">Ciudad *</label>
-                                <input type="text" id="city" name="city" placeholder="Santiago" required>
                             </div>
                         </div>
                     </div>
@@ -553,6 +556,10 @@
                                 <div class="form-group">
                                     <label for="orgCity">Ciudad *</label>
                                     <input type="text" id="orgCity" name="orgCity" placeholder="Santiago" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="orgAddress">Dirección Exacta (Para el mapa) *</label>
+                                    <input type="text" id="orgAddress" name="orgAddress" placeholder="Ej: Calle Los Álamos 555" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="orgPhone">Teléfono *</label>
@@ -738,7 +745,8 @@
                     phone: document.getElementById('phone').value,
                     businessName: document.getElementById('businessName').value,
                     donationType: document.getElementById('donationType').value,
-                    city: document.getElementById('city').value
+                    city: document.getElementById('city').value,
+                    address: document.getElementById('address').value
                 };
 
                 if (!formData.donationType) {
@@ -755,7 +763,8 @@
                     orgPhone: document.getElementById('orgPhone').value,
                     orgFirstName: document.getElementById('orgFirstName').value,
                     orgLastName: document.getElementById('orgLastName').value,
-                    orgEmail: document.getElementById('orgEmail').value
+                    orgEmail: document.getElementById('orgEmail').value,
+                    orgAddress: document.getElementById('orgAddress').value,
                 };
 
                 if (!formData.orgType) {

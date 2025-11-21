@@ -181,12 +181,16 @@ def crearUsuario(request):
                 nombre = data.get('firstName')
                 apellido = data.get('lastName')
                 telefono = data.get('phone')
+                ciudad=data.get('city')
+                direccion=data.get('address')
             elif tipo_usuario == 'organization':
                 # Para la organización, usamos los nombres de campos correctos
                 email = data.get('orgEmail')
                 nombre = data.get('orgFirstName')
                 apellido = data.get('orgLastName')
                 telefono = data.get('orgPhone')
+                direccion=data.get('orgAddress')
+                descripcion=data.get('description')
             else:
                 return JsonResponse({'success': False, 'message': 'Tipo de usuario no válido'}, status=400)
 
@@ -513,3 +517,33 @@ def aceptar_donacion(request, donacion_id):
 
     # Redirigimos a la misma página. La donación aceptada ya no aparecerá en la lista.
     return redirect('ver_donaciones_disponibles')
+
+# =====================================================
+# VISTA: Seguimiento Google maps
+# =====================================================
+
+def ver_seguimiento(request, donacion_id):
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+        
+    donacion = get_object_or_404(Donacion, id=donacion_id)
+    
+    # Obtenemos la dirección de origen (Donador) y destino (Organización)
+    # Si aún no tiene organización asignada, usaremos una dirección genérica o vacía
+    origen = donacion.donador.direccion if donacion.donador.direccion else "Santiago, Chile"
+    
+    # Intentamos obtener la dirección de la organización que aceptó la donación
+    destino = "Santiago Centro, Chile" # Default
+    recepcion = donacion.recepciones.first() # Usamos el related_name 'recepciones'
+    if recepcion and recepcion.organizacion.direccion:
+        destino = recepcion.organizacion.direccion
+
+    context = {
+        'donacion': donacion,
+        'origen': origen,
+        'destino': destino,
+        # IMPORTANTE: Necesitarás una API KEY de Google Maps. 
+        # Para pruebas locales a veces funciona sin ella o con mensaje de advertencia.
+        'google_maps_api_key': 'TU_API_KEY_AQUI' 
+    }
+    return render(request, 'templatesApp/seguimiento.html', context)

@@ -32,4 +32,5 @@ urlpatterns = [
     path('donacion/aceptar/<int:donacion_id>/', views.aceptar_donacion, name="aceptar_donacion"),
     path('usuario/',views.usuario_list),
     path('usuario/<int:pk>',views.usuario_detail),
+    path('donacion/seguimiento/<int:donacion_id>/', views.ver_seguimiento, name="ver_seguimiento"),
 ]
