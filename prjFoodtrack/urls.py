@@ -33,4 +33,5 @@ urlpatterns = [
     path('usuario/',views.usuario_list),
     path('usuario/<int:pk>',views.usuario_detail),
     path('donacion/seguimiento/<int:donacion_id>/', views.ver_seguimiento, name="ver_seguimiento"),
+    path('donaciones/aceptadas/', views.ver_donaciones_aceptadas, name="ver_donaciones_aceptadas"),
 ]

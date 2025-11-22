@@ -55,6 +55,11 @@
                             {% if donacion.estado == 'pendiente' %}
                                 <a href="{% url 'editar_donacion' donacion.id %}" style="color: #f39c12; text-decoration: none; margin-right: 1rem;">Editar</a>
                                 <a href="{% url 'cancelar_donacion' donacion.id %}" style="color: #e74c3c; text-decoration: none;" onclick="return confirm('¿Estás seguro de que quieres cancelar esta donación?');">Cancelar</a>
+                            
+                            {% elif donacion.estado == 'en_transito' or donacion.estado == 'entregada' %}
+                                <a href="{% url 'ver_seguimiento' donacion.id %}" style="color: #3498db; text-decoration: none; font-weight: bold;">
+                                    🗺️ Ver Seguimiento
+                                </a>
                             {% else %}
                                 <span>--</span>
                             {% endif %}

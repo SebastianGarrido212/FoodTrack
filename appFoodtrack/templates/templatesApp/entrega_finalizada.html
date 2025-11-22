@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrega Finalizada</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f7f6; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; }
+        .icon { font-size: 5rem; margin-bottom: 20px; }
+        h1 { color: #27ae60; margin: 0 0 10px 0; }
+        p { color: #7f8c8d; line-height: 1.6; }
+        .comment { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; font-style: italic; border-left: 4px solid #27ae60; }
+        .btn { display: inline-block; padding: 10px 20px; background: #27ae60; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">✅</div>
+        <h1>¡Entrega Finalizada!</h1>
+        <p>La donación de <strong>{{ donacion.tipo_alimento }}</strong> ha llegado a su destino.</p>
+        
+        <div class="comment">
+            "{{ comentario }}"
+        </div>
+        
+        <a href="{% url 'dashboard' %}" class="btn">Volver al Dashboard</a>
+    </div>
+</body>
+</html>

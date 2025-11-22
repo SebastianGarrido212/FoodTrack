@@ -36,23 +36,23 @@
 
     <div id="map"></div>
 
-    <script>
+<script>
         function initMap() {
             const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer();
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true
+            });
             
-            // Coordenadas por defecto (Santiago)
             const santiago = { lat: -33.4489, lng: -70.6693 };
             
             const map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 12,
                 center: santiago,
-                disableDefaultUI: true, // Mapa más limpio
+                disableDefaultUI: true,
             });
 
             directionsRenderer.setMap(map);
 
-            // Calculamos la ruta
             const request = {
                 origin: "{{ origen }}",
                 destination: "{{ destino }}",
@@ -62,9 +62,57 @@
             directionsService.route(request, function(result, status) {
                 if (status == 'OK') {
                     directionsRenderer.setDirections(result);
+                    
+                    const ruta = result.routes[0].overview_path;
+
+                    // --- VARIABLES DE TIEMPO ---
+                    const TIEMPO_TOTAL_SEGUNDOS = 90; // 1 minuto y medio
+                    
+                    // Obtenemos la hora de inicio enviada por Django
+                    // (Multiplicamos por 1000 porque JS usa milisegundos, Python usa segundos)
+                    const fechaInicioMs = parseFloat("{{ inicio_timestamp }}") * 1000;
+                    const ahoraMs = Date.now();
+                    
+                    // Calculamos cuántos segundos han pasado realmente
+                    const segundosTranscurridos = (ahoraMs - fechaInicioMs) / 1000;
+                    
+                    // Calculamos el porcentaje completado (0.0 a 1.0)
+                    let porcentaje = segundosTranscurridos / TIEMPO_TOTAL_SEGUNDOS;
+                    if (porcentaje > 1) porcentaje = 1; // Si ya pasó el tiempo, lo dejamos en el final
+                    if (porcentaje < 0) porcentaje = 0;
+
+                    // --- CÁLCULO DE POSICIÓN INICIAL ---
+                    // En lugar de empezar en 0, empezamos proporcionalmente al tiempo que pasó
+                    let paso = Math.floor(ruta.length * porcentaje);
+                    
+                    console.log("Recuperando posición: " + Math.round(porcentaje * 100) + "% completado.");
+
+                    const camionMarker = new google.maps.Marker({
+                        position: ruta[paso], // <--- AQUÍ USAMOS LA POSICIÓN CALCULADA
+                        map: map,
+                        icon: {
+                            url: "https://cdn-icons-png.flaticon.com/512/2769/2769339.png",
+                            scaledSize: new google.maps.Size(50, 50),
+                            anchor: new google.maps.Point(25, 25)
+                        },
+                        title: "Repartidor en camino"
+                    });
+
+                    // Calculamos velocidad para el resto del viaje
+                    const TIEMPO_TOTAL_MS = TIEMPO_TOTAL_SEGUNDOS * 1000;
+                    const velocidadCalculada = TIEMPO_TOTAL_MS / ruta.length;
+
+                    const animacion = setInterval(() => {
+                        paso++;
+                        if (paso < ruta.length) {
+                            camionMarker.setPosition(ruta[paso]);
+                        } else {
+                            clearInterval(animacion);
+                        }
+                    }, velocidadCalculada); 
+
                 } else {
                     console.error('Error en Google Maps:', status);
-                    alert("Modo demostración: No se pudo trazar la ruta real (Falta API Key o dirección inválida).");
                 }
             });
         }

@@ -485,9 +485,10 @@
                                 <label for="city">Ciudad *</label>
                                 <input type="text" id="city" name="city" placeholder="Santiago" required>
                             </div>
+
                             <div class="form-group">
-                                <label for="address">Dirección Exacta *</label>
-                                <input type="text" id="address" name="address" placeholder="Ej: Av. Providencia 1234" required>
+                                <label for="address">Dirección Exacta (Para el mapa) *</label>
+                                <input type="text" id="address" name="address" placeholder="Escribe tu dirección..." autocomplete="off" required>
                             </div>
                         </div>
 
@@ -557,9 +558,10 @@
                                     <label for="orgCity">Ciudad *</label>
                                     <input type="text" id="orgCity" name="orgCity" placeholder="Santiago" required>
                                 </div>
+
                                 <div class="form-group">
                                     <label for="orgAddress">Dirección Exacta (Para el mapa) *</label>
-                                    <input type="text" id="orgAddress" name="orgAddress" placeholder="Ej: Calle Los Álamos 555" required>
+                                    <input type="text" id="orgAddress" name="orgAddress" placeholder="Escribe dirección de la sede..." autocomplete="off" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="orgPhone">Teléfono *</label>
@@ -647,8 +649,27 @@
             </div>
         </div>
     </div>
-
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4Q45Y4lsiLFfgi1e0-MhPh8Y7q1thQic&libraries=places&loading=async"></script>
     <script>
+        function initAutocomplete() {
+            // Configurar autocompletado para Donador
+            const donorInput = document.getElementById("address");
+            if(donorInput) {
+                new google.maps.places.Autocomplete(donorInput);
+                // Evitar que al dar Enter se envíe el formulario
+                donorInput.addEventListener("keydown", function(e) { if(e.keyCode == 13) e.preventDefault(); });
+            }
+
+            // Configurar autocompletado para Organización
+            const orgInput = document.getElementById("orgAddress");
+            if(orgInput) {
+                new google.maps.places.Autocomplete(orgInput);
+                orgInput.addEventListener("keydown", function(e) { if(e.keyCode == 13) e.preventDefault(); });
+            }
+        }
+
+        // Iniciar cuando cargue la ventana
+        window.onload = initAutocomplete;
         let currentType = null;
 
         function selectType(type) {
@@ -733,6 +754,8 @@
                 type: currentType,
                 password: document.getElementById('password').value,
                 confirmPassword: document.getElementById('confirmPassword').value,
+                address: document.getElementById('address').value,
+                orgAddress: document.getElementById('orgAddress').value,
                 newsletter: document.getElementById('newsletter').checked
             };
 

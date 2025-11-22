@@ -3,12 +3,14 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Donacion, Donador, Usuario
+from .models import Donacion, Donador, SeguimientoEntrega, Usuario
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import UsuarioSerializer
+from django.utils import timezone
 import json
+import random
 from appFoodtrack.models import Usuario, Donador, Organizacion, HistorialTransacciones, RecepcionDonacion, Donacion
 
 # =====================================================
@@ -160,11 +162,6 @@ def inicioSesion(request):
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def crearUsuario(request):
-    """
-    Maneja el registro de nuevos usuarios
-    GET: Renderiza el formulario
-    POST: Crea un nuevo usuario (donador u organización)
-    """
     if request.method == 'GET':
         return render(request, 'templatesApp/CrearUsuario.html')
     
@@ -182,7 +179,7 @@ def crearUsuario(request):
                 apellido = data.get('lastName')
                 telefono = data.get('phone')
                 ciudad=data.get('city')
-                direccion=data.get('address')
+                direccion=data.get('address'),
             elif tipo_usuario == 'organization':
                 # Para la organización, usamos los nombres de campos correctos
                 email = data.get('orgEmail')
@@ -221,6 +218,7 @@ def crearUsuario(request):
                     usuario=usuario,
                     nombre_negocio=data.get('businessName'),
                     tipo_donador=data.get('donationType'),
+                    direccion=data.get('address'),
                     ciudad=data.get('city')
                 )
             
@@ -230,6 +228,7 @@ def crearUsuario(request):
                     nombre_organizacion=data.get('orgName'),
                     tipo_organizacion=data.get('orgType'),
                     ciudad=data.get('orgCity'),
+                    direccion=data.get('orgAddress'),
                     descripcion=data.get('description')
                 )
             
@@ -499,12 +498,30 @@ def aceptar_donacion(request, donacion_id):
     donacion.estado = 'en_transito'
     donacion.save()
 
+    destinos_prefab = [
+        "Costanera Center, Santiago, Chile",
+        "Parque O'Higgins, Santiago, Chile",
+        "Estadio Monumental, Macul, Chile",
+        "Aeropuerto Arturo Merino Benítez, Chile",
+        "Cerro San Cristóbal, Santiago, Chile"
+    ]
+
+    destino_final = random.choice(destinos_prefab)
+
     # 2. Creamos el registro de recepción para vincular la organización a la donación
     RecepcionDonacion.objects.create(
         donacion=donacion,
         organizacion=organizacion,
-        cantidad_recibida=donacion.cantidad,  # Asumimos que se recibe la cantidad completa
+        cantidad_recibida=donacion.cantidad,
         responsable_name=f"{usuario.nombre} {usuario.apellido}"
+    )
+
+    SeguimientoEntrega.objects.create(
+        donacion=donacion,
+        organizacion=organizacion,
+        estado_entrega='en_transito',
+        ubicacion=destino_final,
+        usuario_actualizador=usuario
     )
 
     # 3. (Opcional pero recomendado) Registrar en el historial de transacciones
@@ -512,7 +529,7 @@ def aceptar_donacion(request, donacion_id):
         usuario=usuario,
         donacion=donacion,
         tipo_accion='recepcionar_donacion',
-        descripcion=f"La organización '{organizacion.nombre_organizacion}' aceptó la donación de '{donacion.tipo_alimento}'."
+        descripcion=f"La organización aceptó la donación. Destino fijado: {destino_final}"
     )
 
     # Redirigimos a la misma página. La donación aceptada ya no aparecerá en la lista.
@@ -528,22 +545,92 @@ def ver_seguimiento(request, donacion_id):
         
     donacion = get_object_or_404(Donacion, id=donacion_id)
     
-    # Obtenemos la dirección de origen (Donador) y destino (Organización)
-    # Si aún no tiene organización asignada, usaremos una dirección genérica o vacía
-    origen = donacion.donador.direccion if donacion.donador.direccion else "Santiago, Chile"
+    # PUNTO 4: Si ya está entregada, mostramos la vista de "Finalizado" y bloqueamos el mapa
+    if donacion.estado == 'entregada':
+        # Buscamos el comentario final que guardamos
+        ultimo_seguimiento = donacion.seguimientos.last()
+        return render(request, 'templatesApp/entrega_finalizada.html', {
+            'donacion': donacion,
+            'comentario': ultimo_seguimiento.comentarios if ultimo_seguimiento else "Entrega finalizada."
+        })
+
+    # Obtenemos el seguimiento activo para saber cuándo empezó y a dónde va
+    seguimiento_actual = donacion.seguimientos.filter(estado_entrega='en_transito').last()
     
-    # Intentamos obtener la dirección de la organización que aceptó la donación
-    destino = "Santiago Centro, Chile" # Default
-    recepcion = donacion.recepciones.first() # Usamos el related_name 'recepciones'
-    if recepcion and recepcion.organizacion.direccion:
-        destino = recepcion.organizacion.direccion
+    if not seguimiento_actual:
+        # Fallback por si algo raro pasó
+        return redirect('dashboard')
+
+    # Recuperamos el destino FIJO que guardamos en el paso anterior
+    destino = seguimiento_actual.ubicacion 
+    origen = donacion.donador.direccion if donacion.donador.direccion else "Plaza de Armas, Santiago, Chile"
+
+    # PUNTO 2: EL TEMPORIZADOR (Simulación)
+    # Calculamos cuánto tiempo ha pasado desde que se aceptó
+    tiempo_transcurrido = timezone.now() - seguimiento_actual.fecha_seguimiento
+    
+    # Si han pasado más de 30 SEGUNDOS (ajústalo a tu gusto para la demo)
+    if tiempo_transcurrido.total_seconds() > 90:
+        # FINALIZAMOS LA ENTREGA AUTOMÁTICAMENTE
+        donacion.estado = 'entregada'
+        donacion.save()
+        
+        comentarios_finales = [
+            "Entrega completada sin ningún inconveniente ✅",
+            "Entrega finalizada, se recibió conforme 📦",
+            "Recibido con éxito en portería 🏢",
+            "Entrega finalizada, detalle de producto con leve abolladura ⚠️"
+        ]
+        
+        # Actualizamos el seguimiento
+        seguimiento_actual.estado_entrega = 'entregada_destino'
+        seguimiento_actual.comentarios = random.choice(comentarios_finales)
+        seguimiento_actual.save()
+        
+        # Registramos historial
+        HistorialTransacciones.objects.create(
+            usuario=Usuario.objects.get(id=request.session['usuario_id']),
+            donacion=donacion,
+            tipo_accion='entregar_donacion',
+            descripcion="El sistema finalizó la entrega automáticamente (Demo Timer)."
+        )
+        
+        # Recargamos la página para que entre en el "IF" del principio (Punto 4)
+        return redirect('ver_seguimiento', donacion_id=donacion.id)
 
     context = {
         'donacion': donacion,
         'origen': origen,
         'destino': destino,
-        # IMPORTANTE: Necesitarás una API KEY de Google Maps. 
-        # Para pruebas locales a veces funciona sin ella o con mensaje de advertencia.
-        'google_maps_api_key': 'TU_API_KEY_AQUI' 
+        'google_maps_api_key': 'AIzaSyD4Q45Y4lsiLFfgi1e0-MhPh8Y7q1thQic', # <--- RECUERDA TU KEY
+        'inicio_timestamp': seguimiento_actual.fecha_seguimiento.timestamp()
     }
     return render(request, 'templatesApp/seguimiento.html', context)
+
+
+# =====================================================
+# VISTA: ver donaciones aceptadas
+# =====================================================
+
+def ver_donaciones_aceptadas(request):
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+
+    try:
+        usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        if usuario.tipo_usuario != 'organizacion':
+            return redirect('dashboard')
+        
+        organizacion = Organizacion.objects.get(usuario=usuario)
+    except (Usuario.DoesNotExist, Organizacion.DoesNotExist):
+        request.session.flush()
+        return redirect('inicioSesion')
+
+    # Buscamos las donaciones vinculadas a esta organización a través de la tabla de recepción
+    # y que NO estén canceladas.
+    donaciones = Donacion.objects.filter(recepciones__organizacion=organizacion).exclude(estado='cancelada').order_by('-fecha_creacion')
+
+    context = {
+        'donaciones': donaciones
+    }
+    return render(request, 'templatesApp/donaciones_aceptadas.html', context)

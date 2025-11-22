@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Donaciones Aceptadas</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { margin-bottom: 2rem; }
+        h1 { color: #2c3e50; }
+        .table-container { background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { background-color: #f8f9fa; color: #555; }
+        .btn-track { 
+            background: #3498db; color: white; padding: 8px 15px; 
+            text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 0.9rem; 
+        }
+        .btn-track:hover { background: #2980b9; }
+        .back-link { display: inline-block; margin-top: 1.5rem; color: #7f8c8d; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Donaciones en Curso / Historial</h1>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alimento</th>
+                        <th>Cantidad</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donacion in donaciones %}
+                    <tr>
+                        <td>{{ donacion.tipo_alimento }}</td>
+                        <td>{{ donacion.cantidad }} {{ donacion.get_unidad_medida_display }}</td>
+                        <td>{{ donacion.get_estado_display }}</td>
+                        <td>
+                            <a href="{% url 'ver_seguimiento' donacion.id %}" class="btn-track">
+                                🗺️ Ver Seguimiento
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem;">No has aceptado donaciones aún.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{% url 'dashboard' %}" class="back-link">← Volver al Dashboard</a>
+    </div>
+</body>
+</html>
