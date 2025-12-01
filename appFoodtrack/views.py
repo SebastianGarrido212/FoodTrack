@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Donacion, Donador, SeguimientoEntrega, Usuario
 from rest_framework import status
@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import UsuarioSerializer
 from django.utils import timezone
+import openpyxl
 import json
 import random
 from appFoodtrack.models import Usuario, Donador, Organizacion, HistorialTransacciones, RecepcionDonacion, Donacion
@@ -634,3 +635,54 @@ def ver_donaciones_aceptadas(request):
         'donaciones': donaciones
     }
     return render(request, 'templatesApp/donaciones_aceptadas.html', context)
+
+
+
+def descargar_historial_excel(request):
+    # 1. Seguridad (Igual que antes)
+    if 'usuario_id' not in request.session:
+        return redirect('inicioSesion')
+    
+    try:
+        usuario = Usuario.objects.get(id=request.session['usuario_id'])
+        if usuario.tipo_usuario != 'organizacion':
+            return redirect('dashboard')
+        organizacion = Organizacion.objects.get(usuario=usuario)
+    except:
+        return redirect('inicioSesion')
+
+    # 2. Obtenemos los datos
+    donaciones = Donacion.objects.filter(recepciones__organizacion=organizacion).exclude(estado='cancelada').order_by('-fecha_creacion')
+
+    # 3. Creamos el libro de Excel (Workbook)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Historial Donaciones"
+
+    # 4. Escribimos los Encabezados
+    headers = ['ID', 'Alimento', 'Cantidad', 'Unidad', 'Donador', 'Fecha Recepción', 'Estado', 'Descripción']
+    ws.append(headers)
+
+    # 5. Escribimos los Datos
+    for d in donaciones:
+        recepcion = d.recepciones.filter(organizacion=organizacion).first()
+        fecha_recepcion = recepcion.fecha_recepcion.strftime("%d/%m/%Y %H:%M") if recepcion else "" # Formato chileno
+
+        row = [
+            d.id,
+            d.tipo_alimento,
+            d.cantidad,
+            d.get_unidad_medida_display(),
+            d.donador.nombre_negocio or d.donador.usuario.nombre,
+            fecha_recepcion,
+            d.get_estado_display(),
+            d.descripcion
+        ]
+        ws.append(row)
+
+    # 6. Preparamos la respuesta HTTP para descargar el archivo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="historial_donaciones.xlsx"'
+    
+    wb.save(response)
+    return response

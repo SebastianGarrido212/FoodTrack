@@ -34,4 +34,5 @@ urlpatterns = [
     path('usuario/<int:pk>',views.usuario_detail),
     path('donacion/seguimiento/<int:donacion_id>/', views.ver_seguimiento, name="ver_seguimiento"),
     path('donaciones/aceptadas/', views.ver_donaciones_aceptadas, name="ver_donaciones_aceptadas"),
+    path('donaciones/descargar-excel/', views.descargar_historial_excel, name="descargar_historial_excel"),
 ]
