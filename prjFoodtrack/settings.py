@@ -79,15 +79,13 @@ WSGI_APPLICATION = 'prjFoodtrack.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Configuración híbrida:
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'foodtrack',
-        'USER': 'root',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
+    'default': dj_database_url.config(
+        default='mysql://root:admin@localhost:3306/foodtrack',
+        conn_max_age=600
+    )
 }
 
 
