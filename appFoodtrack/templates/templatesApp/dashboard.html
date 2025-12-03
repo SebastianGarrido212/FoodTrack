@@ -95,7 +95,7 @@
                 <a href="{% url 'crearDonacion' %}" class="nav-link">Nueva Donacion</a>
             {% elif usuario.tipo_usuario == 'organizacion' %}
                  <a href="{% url 'ver_donaciones_disponibles' %}" class="nav-link">Donaciones Recibidas</a>
-                 <a href="{% url 'ver_donaciones_aceptadas' %}" class="nav-link">Donaciones Recibidas</a>
+                 <a href="{% url 'ver_donaciones_aceptadas' %}" class="nav-link">Donaciones en curso</a>
             {% endif %}
             <a href="#" class="nav-link">Mi Perfil</a>
         </nav>
