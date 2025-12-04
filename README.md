@@ -48,7 +48,15 @@ __Frontend__:
 - Render: Plataforma de despliegue en la nube.
 
 
+## 📋 Requisitos Previos
 
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu sistema:
+
+* **[Python 3.10+](https://www.python.org/downloads/)**: El lenguaje base del proyecto.
+* **[Git](https://git-scm.com/downloads)**: Para clonar el repositorio.
+* **[Visual Studio Code](https://code.visualstudio.com/)** (Opcional): Editor de código recomendado.
+* **Cuenta en [Google Cloud Platform](https://console.cloud.google.com/)**: Para obtener las API Keys de Maps.
+* **Cuenta en [Render](https://render.com/)** (Opcional): Si deseas desplegar el proyecto en la nube.
 # Instalación Local
 Si deseas correr este proyecto en tu máquina local, sigue estos pasos:
 
