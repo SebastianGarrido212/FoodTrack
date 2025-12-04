@@ -5,7 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse - FoodTrack</title>
     <style>
-        * {
+        @view-transition {
+            navigation: auto;
+        }
+        ::view-transition-old(root) {
+            animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+        }
+
+        ::view-transition-new(root) {
+            animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+        }
+        @keyframes slide-to-left {
+            to { transform: translateX(-100%); opacity: 0; }
+        }
+
+        @keyframes slide-from-right {
+            from { transform: translateX(100%); }
+        }
+                * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;

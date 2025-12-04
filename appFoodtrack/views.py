@@ -71,89 +71,80 @@ def usuario_detail(request, pk):
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def inicioSesion(request):
-    """
-    Maneja el login de usuarios
-    GET: Renderiza el formulario
-    POST: Procesa el login
-    """
+    # Si entran por la URL normal (GET), mostramos la página con la animación
     if request.method == 'GET':
         return render(request, 'templatesApp/IniciarSesion.html')
     
+    # Si el JavaScript envía los datos (POST)
     elif request.method == 'POST':
         try:
+            # Leemos el JSON que envía el script de la animación
             data = json.loads(request.body)
             email = data.get('email')
             password = data.get('password')
             remember = data.get('remember', False)
             
-            # Validaciones
+            # --- Validaciones ---
             if not email or not password:
                 return JsonResponse({
-                    'success': False,
+                    'success': False, 
                     'message': 'Email y contraseña son requeridos'
                 }, status=400)
             
-            # Buscar usuario
+            # --- Buscar usuario ---
             try:
                 usuario = Usuario.objects.get(email=email)
             except Usuario.DoesNotExist:
                 return JsonResponse({
-                    'success': False,
+                    'success': False, 
                     'message': 'Usuario o contraseña incorrectos'
                 }, status=401)
             
-            # Verificar contraseña
+            # --- Verificar contraseña ---
             if not check_password(password, usuario.password):
                 return JsonResponse({
-                    'success': False,
+                    'success': False, 
                     'message': 'Usuario o contraseña incorrectos'
                 }, status=401)
             
-            # Verificar que usuario esté activo
+            # --- Verificar activo ---
             if not usuario.activo:
                 return JsonResponse({
-                    'success': False,
+                    'success': False, 
                     'message': 'Usuario inactivo'
                 }, status=403)
             
-            # Registrar en historial
+            # --- Registrar Historial ---
             HistorialTransacciones.objects.create(
                 usuario=usuario,
                 tipo_accion='login',
                 descripcion=f'Inicio de sesión - {email}'
             )
             
-            # Crear sesión
+            # --- Crear Sesión (Login exitoso) ---
             request.session['usuario_id'] = usuario.id
             request.session['usuario_email'] = usuario.email
             request.session['usuario_tipo'] = usuario.tipo_usuario
             
-            # 
             if remember:
                 request.session.set_expiry(7 * 24 * 60 * 60)  # 7 días
             
+            # RESPUESTA DE ÉXITO (Esto activa la animación de la plantita 🌱)
             return JsonResponse({
                 'success': True,
                 'message': 'Sesión iniciada correctamente',
+                # Enviamos datos extra por si los necesitas en el frontend
                 'usuario': {
                     'id': usuario.id,
                     'nombre': usuario.nombre,
-                    'apellido': usuario.apellido,
-                    'email': usuario.email,
                     'tipo': usuario.tipo_usuario
                 }
             }, status=200)
         
         except json.JSONDecodeError:
-            return JsonResponse({
-                'success': False,
-                'message': 'Datos inválidos'
-            }, status=400)
+            return JsonResponse({'success': False, 'message': 'Datos inválidos'}, status=400)
         except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Error en el servidor: {str(e)}'
-            }, status=500)
+            return JsonResponse({'success': False, 'message': f'Error en el servidor: {str(e)}'}, status=500)
 
 
 # =====================================================
